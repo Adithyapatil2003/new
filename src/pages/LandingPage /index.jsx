@@ -1,22 +1,42 @@
 import React from "react";
+
 import { useNavigate } from "react-router-dom";
-import { Button, Img, List, Text } from "components";
+
+import { Button, CheckBox, Img, Input, List, Slider, Text } from "components";
+import LandingPageCard from "components/LandingPageCard";
 import LandingPageFooter from "components/LandingPageFooter";
+import "styles/color.css"
+import "styles/index.css"
+import "styles/font.css"
+import "styles/tailwind.css"
 
+import LandingPageHeader from "components/LandingPageHeader";
 
-const LandingPage = () => {
+const LandingPagePage = () => {
   const navigate=useNavigate()
+  const landingPageCardPropList = [
+    {},
+    { image: "images/img_image_1.png" },
+    { image: "images/img_image_2.png" },
+    { image: "images/img_image_3.png" },
+    { image: "images/img_image_4.png" },
+    { image: "images/img_image_5.png" },
+  ];
+  const sliderRef = React.useRef(null);
+  const [sliderState, setsliderState] = React.useState(0);
+
   return (
     <>
-    <div className="bg-deep_orange-50 text-white-A700 px-11 py-5 w-full"
-         style={{ position: 'relative', color: 'black', fontSize: '60px', 
-         fontFamily: 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif', fontWeight: 'bold' }}>
-      LLG.</div>
-    
-    <div className="bg-red-200 flex flex-col font-markoone py-[50px] gap-[50px] justify-center w-full">
-        <div className="font-manrope justify-center px-[120px] w-full">
-          <div className="flex gap-6 items-center justify-center w-full">
-            <div className="bg-red-100 flex flex-1 flex-col sm:px-5 px-[50px] py-[50px] rounded-[20px] w-full">
+    <div className="Landing">
+     <div className="bg-deep_orange-50 text-white-A700 text-center py-11 fixed w-full "></div>
+    <div style={{ position: 'fixed', bottom: '80.8%', right: '180%',left:'2%', transform: 'translate(-50%, -50%)', color: 'black', fontSize: '60px', fontFamily: 'Impact, Haettenschweiler, "Arial Narrow Bold", sans-serif', fontWeight: 'bold' }}>LLG.</div>
+      <div className="bg-red-200 flex flex-col font-markoone sm:gap-10 md:gap-10 gap-[100px] items-center justify-start mx-auto w-auto sm:w-full md:w-full ">
+        <div className="flex flex-col items-start justify-start w-full">
+          <LandingPageHeader className="bg-white-A700 flex gap-2 h-20 md:h-auto items-center justify-between md:px-5 px-[120px] py-[19px] w-full" />
+        </div>
+        <div className="flex flex-col font-manrope items-start justify-start md:px-10 sm:px-5 px-[120px] w-full">
+          <div className="flex md:flex-col flex-row gap-6 items-center justify-center max-w-[1200px] mx-auto w-full">
+            <div className="bg-red-100 flex flex-1 flex-col h-[424px] md:h-auto items-start justify-center md:px-10 sm:px-5 px-[50px] py-[46px] rounded-[20px] w-full">
               <div className="flex flex-col gap-[50px] items-start justify-start w-full">
                 <div className="flex flex-col gap-4 items-start justify-start w-full">
                   <Text
@@ -291,8 +311,9 @@ const LandingPage = () => {
         </div>
         <LandingPageFooter className="bg-red-200 flex gap-2 items-center justify-center md:px-5 px-[120px] py-20 w-full" />
       </div>
+      </div>
     </>
   );
 };
 
-export default LandingPage;
+export default LandingPagePage;
