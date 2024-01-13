@@ -1,779 +1,223 @@
-import React from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { useState, useEffect } from "react";
+import { Button, Img, SelectBox, Text } from "components";
+import { useNavigate } from 'react-router-dom';
+import { db } from "firebase.js"
 
-import { Button, Img, Input, List, SelectBox, Text } from "components";
-import LandingPageFooter from "components/LandingPageFooter";
-import LandingPageHeader from "components/LandingPageHeader";
-
-const dropdownlargeOptionsList = [
-  { label: "Option1", value: "option1" },
-  { label: "Option2", value: "option2" },
-  { label: "Option3", value: "option3" },
+const dropdownPractice = [
+  { label: "Banking Law", value: "Banking" },
+  { label: "Civil Law", value: "Civil" },
+  { label: "Corporate Law", value: "Corporate" },
+  { label: "Criminal Law", value: "Criminal" },
+  { label: "Family Law", value: "Family" },
+  { label: "International Law", value: "International" },
 ];
 
+const dropdownCity = [
+  { label: "Bangalore", value: "Bangalore" },
+  { label: "Chennai", value: "Chennai" },
+  { label: "Delhi", value: "Delhi" },
+];
+
+
 const AgentListPage = () => {
+
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedPracticeArea, setSelectedPracticeArea] = useState(null);
+  const [filtered, setFiltered] = useState([]);
+  const [searchCounter, setSearchCounter] = useState(0);
+
+  const agentCollection = db.collection('users');
+
+  const filteredAgents = async () => {
+    const snapshot = await agentCollection.get();
+    const agents = snapshot.docs.map(doc => doc.data());
+
+    const filtered = agents.filter((agent) => {
+      const cityMatch = !selectedCity || agent.city.trim().toLowerCase() === selectedCity.trim().toLowerCase();
+      const practiceMatch = !selectedPracticeArea || agent.practiceArea.split(',').every((area) => area.trim().toLowerCase().includes(selectedPracticeArea.trim().toLowerCase()));
+      return cityMatch && practiceMatch;
+    });
+    return filtered;
+  };
+
+  const handleSearch = () => {
+    setSearchCounter(searchCounter + 1);
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const filteredData = await filteredAgents();
+      setFiltered(filteredData);
+    };
+
+    fetchData();
+  }, [searchCounter]);
+
+  const history =useNavigate();
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    history('/register')
+  };
+  
   return (
     <>
-      <div className="bg-gray-51 flex flex-col font-markoone sm:gap-10 md:gap-10 gap-[100px] items-start justify-start mx-auto w-auto sm:w-full md:w-full">
-        <div className="flex flex-col gap-14 items-start justify-start w-full">
-          <LandingPageHeader className="bg-white-A700 flex gap-2 h-20 md:h-auto items-center justify-between md:px-5 px-[120px] py-[19px] w-full" />
-          <div className="flex flex-col font-manrope items-center justify-center md:px-10 sm:px-5 px-[120px] w-full">
-            <div className="flex flex-col gap-6 items-center justify-center max-w-[1200px] mx-auto w-full">
-              <Text
-                className="text-4xl sm:text-[32px] md:text-[34px] text-gray-900 tracking-[-0.72px] w-full"
-                size="txtManropeExtraBold36"
-              >
-                Some Nearby Good Agents
-              </Text>
-              <div className="flex md:flex-col flex-row gap-4 items-center justify-start w-full">
-                <div className="bg-white-A700 border border-bluegray-100 border-solid flex flex-1 flex-col items-start justify-start px-4 py-3.5 rounded-[10px] w-full">
-                  <Input
-                    name="frame1000001612"
-                    placeholder="Enter your address"
-                    className="font-semibold p-0 placeholder:text-gray-600 text-gray-600 text-left text-lg w-full"
-                    wrapClassName="flex pt-1 w-full"
-                    suffix={
-                      <Img
-                        className="mt-auto mb-[3px] h-6 ml-3"
-                        src="images/img_search_gray_600.svg"
-                        alt="search"
-                      />
-                    }
-                  ></Input>
-                </div>
-                <SelectBox
-                  className="bg-white-A700 border border-bluegray-100 border-solid md:flex-1 font-bold pl-5 pr-4 py-[17px] rounded-[10px] text-gray-600 text-left text-lg w-[12%] md:w-full"
-                  placeholderClassName="text-gray-600"
-                  indicator={
-                    <Img
-                      className="h-6 w-6"
-                      src="images/img_arrowdown_gray_600_24x24.svg"
-                      alt="arrow_down"
-                    />
-                  }
-                  isMulti={false}
-                  name="dropdownlarge"
-                  options={dropdownlargeOptionsList}
-                  isSearchable={false}
-                  placeholder="Review"
-                />
-                <Button
-                  className="bg-gray-900 cursor-pointer flex items-center justify-center min-w-[128px] pl-5 pr-4 py-[17px] rounded-[10px]"
-                  rightIcon={
-                    <Img
-                      className="h-5 mt-px mb-[3px] ml-2.5"
-                      src="images/img_search_white_a700.svg"
-                      alt="search"
-                    />
-                  }
-                >
-                  <div className="font-bold text-left text-lg text-white-A700">
-                    Search
-                  </div>
-                </Button>
-              </div>
-            </div>
+      <div className="bg-gray-51 flex flex-col gap-10 items-center justify-start min-h-screen w-full">
+        <div className="w-full">
+          <div className="bg-white-A700 flex gap-2 h-20 md:h-auto items-center justify-between md:px-5 px-[120px] py-[19px] w-full">
+            <div className="flex md:flex-col flex-row md:gap-10 items-center justify-between w-full">
+             <div className="flex flex-col gap-[1px]">
+            <Text className="text-orange-A700 text-xl" size="txtMarkoOneRegular20">lawfind</Text>
+            <Text size="txtManropeSemiBold18Gray900">by LegalLawGuru</Text>
           </div>
-          <div className="flex flex-col font-manrope md:gap-10 gap-[60px] items-start justify-start md:px-10 sm:px-5 px-[120px] w-full">
-            <div className="flex flex-col items-center justify-center max-w-[1200px] mx-auto w-full">
-              <div className="md:gap-5 gap-6 grid sm:grid-cols-1 md:grid-cols-2 grid-cols-4 justify-center min-h-[auto] w-full">
-                <div className="flex flex-1 flex-col h-[431px] md:h-auto items-start justify-start w-full">
-                  <Img
-                    className="h-[282px] md:h-auto object-cover w-full"
-                    src="images/img_rectangle5615.png"
-                    alt="rectangle5615"
-                  />
-                  <div className="bg-white-A700 border border-bluegray-100 border-solid flex flex-col items-start justify-start px-5 py-3.5 rounded-bl-[10px] rounded-br-[10px] w-full">
-                    <div className="flex flex-col gap-2 items-start justify-start w-full">
-                      <Text
-                        className="text-gray-900 text-xl tracking-[-0.40px] w-full"
-                        size="txtManropeSemiBold20Gray900"
-                      >
-                        Bruno Fernandes
-                      </Text>
-                      <div className="flex flex-row gap-3.5 items-center justify-start w-full">
-                        <div className="flex flex-row items-center justify-evenly w-2/5">
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_One"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Two"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Three"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star_gray_600.svg"
-                            alt="star_Four"
-                          />
-                        </div>
-                        <Text
-                          className="flex-1 text-base text-gray-900 w-auto"
-                          size="txtManropeSemiBold16"
-                        >
-                          4.5 review
-                        </Text>
-                      </div>
-                      <Button className="border border-bluegray-100 border-solid cursor-pointer font-semibold py-[13px] rounded-[10px] text-base text-center text-gray-900 w-full">
-                        View Profile
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-1 flex-col h-[431px] md:h-auto items-start justify-start w-full">
-                  <Img
-                    className="h-[282px] md:h-auto object-cover w-full"
-                    src="images/img_rectangle5616.png"
-                    alt="rectangle5616"
-                  />
-                  <div className="bg-white-A700 border border-bluegray-100 border-solid flex flex-col items-start justify-start px-5 py-3.5 rounded-bl-[10px] rounded-br-[10px] w-full">
-                    <div className="flex flex-col gap-2 items-start justify-start w-full">
-                      <Text
-                        className="text-gray-900 text-xl tracking-[-0.40px] w-full"
-                        size="txtManropeSemiBold20Gray900"
-                      >
-                        Bruno Fernandes
-                      </Text>
-                      <div className="flex flex-row gap-3.5 items-center justify-start w-full">
-                        <div className="flex flex-row items-center justify-evenly w-2/5">
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_One"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Two"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Three"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star_gray_600.svg"
-                            alt="star_Four"
-                          />
-                        </div>
-                        <Text
-                          className="flex-1 text-base text-gray-900 w-auto"
-                          size="txtManropeSemiBold16"
-                        >
-                          4.5 review
-                        </Text>
-                      </div>
-                      <Button className="border border-bluegray-100 border-solid cursor-pointer font-semibold py-[13px] rounded-[10px] text-base text-center text-gray-900 w-full">
-                        View Profile
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-1 flex-col h-[431px] md:h-auto items-start justify-start w-full">
-                  <Img
-                    className="h-[282px] md:h-auto object-cover w-full"
-                    src="images/img_rectangle5614.png"
-                    alt="rectangle5614"
-                  />
-                  <div className="bg-white-A700 border border-bluegray-100 border-solid flex flex-col items-start justify-start px-5 py-3.5 rounded-bl-[10px] rounded-br-[10px] w-full">
-                    <div className="flex flex-col gap-2 items-start justify-start w-full">
-                      <Text
-                        className="text-gray-900 text-xl tracking-[-0.40px] w-full"
-                        size="txtManropeSemiBold20Gray900"
-                      >
-                        Bruno Fernandes
-                      </Text>
-                      <div className="flex flex-row gap-3.5 items-center justify-start w-full">
-                        <div className="flex flex-row items-center justify-evenly w-2/5">
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_One"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Two"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Three"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star_gray_600.svg"
-                            alt="star_Four"
-                          />
-                        </div>
-                        <Text
-                          className="flex-1 text-base text-gray-900 w-auto"
-                          size="txtManropeSemiBold16"
-                        >
-                          4.5 review
-                        </Text>
-                      </div>
-                      <Button className="border border-bluegray-100 border-solid cursor-pointer font-semibold py-[13px] rounded-[10px] text-base text-center text-gray-900 w-full">
-                        View Profile
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-1 flex-col h-[431px] md:h-auto items-start justify-start w-full">
-                  <Img
-                    className="h-[282px] md:h-auto object-cover w-full"
-                    src="images/img_rectangle5614_282x282.png"
-                    alt="rectangle5614"
-                  />
-                  <div className="bg-white-A700 border border-bluegray-100 border-solid flex flex-col items-start justify-start px-5 py-3.5 rounded-bl-[10px] rounded-br-[10px] w-full">
-                    <div className="flex flex-col gap-2 items-start justify-start w-full">
-                      <Text
-                        className="text-gray-900 text-xl tracking-[-0.40px] w-full"
-                        size="txtManropeSemiBold20Gray900"
-                      >
-                        Bruno Fernandes
-                      </Text>
-                      <div className="flex flex-row gap-3.5 items-center justify-start w-full">
-                        <div className="flex flex-row items-center justify-evenly w-2/5">
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_One"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Two"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Three"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star_gray_600.svg"
-                            alt="star_Four"
-                          />
-                        </div>
-                        <Text
-                          className="flex-1 text-base text-gray-900 w-auto"
-                          size="txtManropeSemiBold16"
-                        >
-                          4.5 review
-                        </Text>
-                      </div>
-                      <Button className="border border-bluegray-100 border-solid cursor-pointer font-semibold py-[13px] rounded-[10px] text-base text-center text-gray-900 w-full">
-                        View Profile
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-1 flex-col h-[431px] md:h-auto items-start justify-start w-full">
-                  <Img
-                    className="h-[282px] md:h-auto object-cover w-full"
-                    src="images/img_rectangle5617.png"
-                    alt="rectangle5617"
-                  />
-                  <div className="bg-white-A700 border border-bluegray-100 border-solid flex flex-col items-start justify-start px-5 py-3.5 rounded-bl-[10px] rounded-br-[10px] w-full">
-                    <div className="flex flex-col gap-2 items-start justify-start w-full">
-                      <Text
-                        className="text-gray-900 text-xl tracking-[-0.40px] w-full"
-                        size="txtManropeSemiBold20Gray900"
-                      >
-                        Bruno Fernandes
-                      </Text>
-                      <div className="flex flex-row gap-3.5 items-center justify-start w-full">
-                        <div className="flex flex-row items-center justify-evenly w-2/5">
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_One"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Two"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Three"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star_gray_600.svg"
-                            alt="star_Four"
-                          />
-                        </div>
-                        <Text
-                          className="flex-1 text-base text-gray-900 w-auto"
-                          size="txtManropeSemiBold16"
-                        >
-                          4.5 review
-                        </Text>
-                      </div>
-                      <Button className="border border-bluegray-100 border-solid cursor-pointer font-semibold py-[13px] rounded-[10px] text-base text-center text-gray-900 w-full">
-                        View Profile
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-1 flex-col h-[431px] md:h-auto items-start justify-start w-full">
-                  <Img
-                    className="h-[282px] md:h-auto object-cover w-full"
-                    src="images/img_rectangle5618.png"
-                    alt="rectangle5618"
-                  />
-                  <div className="bg-white-A700 border border-bluegray-100 border-solid flex flex-col items-start justify-start px-5 py-3.5 rounded-bl-[10px] rounded-br-[10px] w-full">
-                    <div className="flex flex-col gap-2 items-start justify-start w-full">
-                      <Text
-                        className="text-gray-900 text-xl tracking-[-0.40px] w-full"
-                        size="txtManropeSemiBold20Gray900"
-                      >
-                        Bruno Fernandes
-                      </Text>
-                      <div className="flex flex-row gap-3.5 items-center justify-start w-full">
-                        <div className="flex flex-row items-center justify-evenly w-2/5">
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_One"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Two"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Three"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star_gray_600.svg"
-                            alt="star_Four"
-                          />
-                        </div>
-                        <Text
-                          className="flex-1 text-base text-gray-900 w-auto"
-                          size="txtManropeSemiBold16"
-                        >
-                          4.5 review
-                        </Text>
-                      </div>
-                      <Button className="border border-bluegray-100 border-solid cursor-pointer font-semibold py-[13px] rounded-[10px] text-base text-center text-gray-900 w-full">
-                        View Profile
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-1 flex-col h-[431px] md:h-auto items-start justify-start w-full">
-                  <Img
-                    className="h-[282px] md:h-auto object-cover w-full"
-                    src="images/img_rectangle5619.png"
-                    alt="rectangle5619"
-                  />
-                  <div className="bg-white-A700 border border-bluegray-100 border-solid flex flex-col items-start justify-start px-5 py-3.5 rounded-bl-[10px] rounded-br-[10px] w-full">
-                    <div className="flex flex-col gap-2 items-start justify-start w-full">
-                      <Text
-                        className="text-gray-900 text-xl tracking-[-0.40px] w-full"
-                        size="txtManropeSemiBold20Gray900"
-                      >
-                        Bruno Fernandes
-                      </Text>
-                      <div className="flex flex-row gap-3.5 items-center justify-start w-full">
-                        <div className="flex flex-row items-center justify-evenly w-2/5">
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_One"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Two"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Three"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star_gray_600.svg"
-                            alt="star_Four"
-                          />
-                        </div>
-                        <Text
-                          className="flex-1 text-base text-gray-900 w-auto"
-                          size="txtManropeSemiBold16"
-                        >
-                          4.5 review
-                        </Text>
-                      </div>
-                      <Button className="border border-bluegray-100 border-solid cursor-pointer font-semibold py-[13px] rounded-[10px] text-base text-center text-gray-900 w-full">
-                        View Profile
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-1 flex-col h-[431px] md:h-auto items-start justify-start w-full">
-                  <Img
-                    className="h-[282px] md:h-auto object-cover w-full"
-                    src="images/img_rectangle5620.png"
-                    alt="rectangle5620"
-                  />
-                  <div className="bg-white-A700 border border-bluegray-100 border-solid flex flex-col items-start justify-start px-5 py-3.5 rounded-bl-[10px] rounded-br-[10px] w-full">
-                    <div className="flex flex-col gap-2 items-start justify-start w-full">
-                      <Text
-                        className="text-gray-900 text-xl tracking-[-0.40px] w-full"
-                        size="txtManropeSemiBold20Gray900"
-                      >
-                        Bruno Fernandes
-                      </Text>
-                      <div className="flex flex-row gap-3.5 items-center justify-start w-full">
-                        <div className="flex flex-row items-center justify-evenly w-2/5">
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_One"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Two"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Three"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star_gray_600.svg"
-                            alt="star_Four"
-                          />
-                        </div>
-                        <Text
-                          className="flex-1 text-base text-gray-900 w-auto"
-                          size="txtManropeSemiBold16"
-                        >
-                          4.5 review
-                        </Text>
-                      </div>
-                      <Button className="border border-bluegray-100 border-solid cursor-pointer font-semibold py-[13px] rounded-[10px] text-base text-center text-gray-900 w-full">
-                        View Profile
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-1 flex-col h-[431px] md:h-auto items-start justify-start w-full">
-                  <Img
-                    className="h-[282px] md:h-auto object-cover w-full"
-                    src="images/img_rectangle5621.png"
-                    alt="rectangle5621"
-                  />
-                  <div className="bg-white-A700 border border-bluegray-100 border-solid flex flex-col items-start justify-start px-5 py-3.5 rounded-bl-[10px] rounded-br-[10px] w-full">
-                    <div className="flex flex-col gap-2 items-start justify-start w-full">
-                      <Text
-                        className="text-gray-900 text-xl tracking-[-0.40px] w-full"
-                        size="txtManropeSemiBold20Gray900"
-                      >
-                        Bruno Fernandes
-                      </Text>
-                      <div className="flex flex-row gap-3.5 items-center justify-start w-full">
-                        <div className="flex flex-row items-center justify-evenly w-2/5">
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_One"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Two"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Three"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star_gray_600.svg"
-                            alt="star_Four"
-                          />
-                        </div>
-                        <Text
-                          className="flex-1 text-base text-gray-900 w-auto"
-                          size="txtManropeSemiBold16"
-                        >
-                          4.5 review
-                        </Text>
-                      </div>
-                      <Button className="border border-bluegray-100 border-solid cursor-pointer font-semibold py-[13px] rounded-[10px] text-base text-center text-gray-900 w-full">
-                        View Profile
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-1 flex-col h-[431px] md:h-auto items-start justify-start w-full">
-                  <Img
-                    className="h-[282px] md:h-auto object-cover w-full"
-                    src="images/img_rectangle5622.png"
-                    alt="rectangle5622"
-                  />
-                  <div className="bg-white-A700 border border-bluegray-100 border-solid flex flex-col items-start justify-start px-5 py-3.5 rounded-bl-[10px] rounded-br-[10px] w-full">
-                    <div className="flex flex-col gap-2 items-start justify-start w-full">
-                      <Text
-                        className="text-gray-900 text-xl tracking-[-0.40px] w-full"
-                        size="txtManropeSemiBold20Gray900"
-                      >
-                        Bruno Fernandes
-                      </Text>
-                      <div className="flex flex-row gap-3.5 items-center justify-start w-full">
-                        <div className="flex flex-row items-center justify-evenly w-2/5">
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_One"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Two"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Three"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star_gray_600.svg"
-                            alt="star_Four"
-                          />
-                        </div>
-                        <Text
-                          className="flex-1 text-base text-gray-900 w-auto"
-                          size="txtManropeSemiBold16"
-                        >
-                          4.5 review
-                        </Text>
-                      </div>
-                      <Button className="border border-bluegray-100 border-solid cursor-pointer font-semibold py-[13px] rounded-[10px] text-base text-center text-gray-900 w-full">
-                        View Profile
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-1 flex-col h-[431px] md:h-auto items-start justify-start w-full">
-                  <Img
-                    className="h-[282px] md:h-auto object-cover w-full"
-                    src="images/img_rectangle5623.png"
-                    alt="rectangle5623"
-                  />
-                  <div className="bg-white-A700 border border-bluegray-100 border-solid flex flex-col items-start justify-start px-5 py-3.5 rounded-bl-[10px] rounded-br-[10px] w-full">
-                    <div className="flex flex-col gap-2 items-start justify-start w-full">
-                      <Text
-                        className="text-gray-900 text-xl tracking-[-0.40px] w-full"
-                        size="txtManropeSemiBold20Gray900"
-                      >
-                        Bruno Fernandes
-                      </Text>
-                      <div className="flex flex-row gap-3.5 items-center justify-start w-full">
-                        <div className="flex flex-row items-center justify-evenly w-2/5">
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_One"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Two"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Three"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star_gray_600.svg"
-                            alt="star_Four"
-                          />
-                        </div>
-                        <Text
-                          className="flex-1 text-base text-gray-900 w-auto"
-                          size="txtManropeSemiBold16"
-                        >
-                          4.5 review
-                        </Text>
-                      </div>
-                      <Button className="border border-bluegray-100 border-solid cursor-pointer font-semibold py-[13px] rounded-[10px] text-base text-center text-gray-900 w-full">
-                        View Profile
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-1 flex-col h-[431px] md:h-auto items-start justify-start w-full">
-                  <Img
-                    className="h-[282px] md:h-auto object-cover w-full"
-                    src="images/img_rectangle5615_282x282.png"
-                    alt="rectangle5615"
-                  />
-                  <div className="bg-white-A700 border border-bluegray-100 border-solid flex flex-col items-start justify-start px-5 py-3.5 rounded-bl-[10px] rounded-br-[10px] w-full">
-                    <div className="flex flex-col gap-2 items-start justify-start w-full">
-                      <Text
-                        className="text-gray-900 text-xl tracking-[-0.40px] w-full"
-                        size="txtManropeSemiBold20Gray900"
-                      >
-                        Bruno Fernandes
-                      </Text>
-                      <div className="flex flex-row gap-3.5 items-center justify-start w-full">
-                        <div className="flex flex-row items-center justify-evenly w-2/5">
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_One"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Two"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star.svg"
-                            alt="star_Three"
-                          />
-                          <Img
-                            className="h-4 w-4"
-                            src="images/img_star_gray_600.svg"
-                            alt="star_Four"
-                          />
-                        </div>
-                        <Text
-                          className="flex-1 text-base text-gray-900 w-auto"
-                          size="txtManropeSemiBold16"
-                        >
-                          4.5 review
-                        </Text>
-                      </div>
-                      <Button className="border border-bluegray-100 border-solid cursor-pointer font-semibold py-[13px] rounded-[10px] text-base text-center text-gray-900 w-full">
-                        View Profile
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="flex sm:flex-col flex-row gap-5 items-center justify-between max-w-[1200px] mx-auto w-full">
-              <div className="flex flex-row gap-[5px] items-start justify-start w-auto">
-                <Button className="border border-gray-700 border-solid cursor-pointer font-semibold h-12 py-[13px] rounded-[10px] text-base text-center text-gray-900 w-12">
-                  1
-                </Button>
-                <Button className="border border-bluegray-102 border-solid cursor-pointer font-semibold h-12 py-[13px] rounded-[10px] text-base text-center text-gray-900 w-12">
-                  2
-                </Button>
-                <Button className="border border-bluegray-102 border-solid cursor-pointer font-semibold h-12 py-[13px] rounded-[10px] text-base text-center text-gray-900 w-12">
-                  3
-                </Button>
-                <Button className="border border-bluegray-102 border-solid cursor-pointer font-semibold h-12 py-[13px] rounded-[10px] text-base text-center text-gray-900 w-12">
-                  4
-                </Button>
-                <Button className="border border-bluegray-102 border-solid cursor-pointer font-semibold h-12 py-[13px] rounded-[10px] text-base text-center text-gray-900 w-12">
-                  5
-                </Button>
-              </div>
-              <Button
-                className="border border-bluegray-102 border-solid cursor-pointer flex items-center justify-center min-w-[134px] px-[17px] py-[13px] rounded-[10px]"
-                rightIcon={
-                  <Img
-                    className="h-4 mt-px mb-[5px] ml-1"
-                    src="images/img_arrowright_gray_900.svg"
-                    alt="arrow_right"
-                  />
-                }
-              >
-                <div className="font-semibold text-base text-gray-900 text-left">
-                  Next Page
-                </div>
-              </Button>
-            </div>
+          </div>
+          <div className="flex flex-row gap-10 h-[42px] md:h-auto sm:hidden items-center justify-start w-[250px]">
+          <Button onClick={handleSubmit}
+          className="bg-gray-900 cursor-pointer font-manrope font-semibold py-2.5 rounded-[10px] text-base text-center text-white-A700 w-full">
+            Register as Lawyer
+          </Button>
+        </div>
           </div>
         </div>
-        <LandingPageFooter className="bg-white-A700 flex gap-2 items-center justify-center md:px-5 px-[120px] py-20 w-full" />
+        {searchCounter === 0 && (
+          <div className="flex flex-row gap-4 justify-center w-[500px]">
+          <Text
+            className="leading-[180.00%] max-w-[610px] md:max-w-full text-gray-700 text-xl"
+            size="txtManropeRegular20">
+          Lawfind is an online platform that facilitates seamless connections between clients and legal professionals. 
+          The platform is designed to simplify the process of finding and approaching lawyers for legal assistance.
+          </Text>
+        </div>
+        )}
+        <div className="flex flex-col font-manrope gap-6 items-center justify-center px-[120px] w-full">
+          <div className="flex md:flex-col flex-row gap-2 items-center justify-center w-full">
+            <SelectBox
+              className="bg-white-A700 border border-bluegray-100 border-solid md:flex-1 font-bold pl-5 pr-4 py-[17px] rounded-[10px] text-gray-600 text-left text-lg w-[17%] md:w-full"
+              placeholderClassName="text-gray-600"
+              indicator={<Img className="h-6 w-6" src="images/img_arrowdown_gray_600_24x24.svg"/>}
+              isMulti={false}
+              name="dropdownCity"
+              options={dropdownCity}
+              isSearchable={true}
+              placeholder="City"
+              onChange={(selectedOption) => setSelectedCity(selectedOption)}
+              value={selectedCity}
+            />
+            <SelectBox
+              className="bg-white-A700 border border-bluegray-100 border-solid md:flex-1 font-bold pl-5 pr-4 py-[17px] rounded-[10px] text-gray-600 text-left text-lg w-[17%] md:w-full"
+              placeholderClassName="text-gray-600"
+              indicator={<Img className="h-6 w-6" src="images/img_arrowdown_gray_600_24x24.svg"/>}
+              isMulti={false}
+              name="dropdownPractice"
+              options={dropdownPractice}
+              isSearchable={true}
+              placeholder="Practice Area"
+              onChange={(selectedOption) => setSelectedPracticeArea(selectedOption)}
+              value={selectedPracticeArea}
+            />
+            <Button
+              className="bg-gray-900 cursor-pointer flex items-center justify-center min-w-[128px] pl-5 pr-4 py-[17px] rounded-[10px]"
+              rightIcon={<Img className="h-5 mt-px mb-[3px] ml-2.5" src="images/img_search_white_a700.svg"/>}
+              onClick={handleSearch}
+            >
+              <div className="font-bold text-left text-lg text-white-A700">Search</div>
+            </Button>
+          </div>
+        
+          <div className="flex flex-col px-[120px] w-full">
+            {searchCounter > 0 && filtered.length > 0 && (filtered.map((agent, index) => (
+                <div key={index} className="flex bg-white-A700 mb-2 border border-bluegray-100 border-solid rounded-[10px] text-gray-750 text-xl px-[25px] py-[5px] tracking-[-0.40px] w-full">
+                  <div className="flex items-center justify-center">
+                    <Img className="h-[150px] md:h-auto rounded-full py-[5px] mr-4" src={agent.img} />
+                    <div className="flex-grow flex-col items-center justify-center w-60">
+                      <Text size="txtManropeSemiBold20Gray900">{agent.name}</Text>
+                      <Text size="txtManropeSemiBold18Gray900">{agent.qual}</Text>
+                      <Text size="txtManropeSemiBold18Gray900">Experience: {agent.exp}</Text>
+                    </div>
+                    <div className="flex-grow flex-col ml-12 items-center justify-center w-50">
+                      <Text size="txtManropeSemiBold20Gray900">Practice Area and Specializations</Text>
+                      <Text size="txtManropeSemiBold18Gray900">{agent.practiceArea}</Text>
+                    </div>
+                    <div className="flex-grow flex-col ml-12 items-center justify-center w-80">
+                      <Text size="txtManropeSemiBold20Gray900">Address and Contact</Text>
+                      <Text size="txtManropeSemiBold18Gray900">{agent.city}</Text>
+                      <Text size="txtManropeSemiBold18Gray900">e-mail: {agent.email}</Text>
+                      <Text size="txtManropeSemiBold18Gray900">Phone: {agent.phone}</Text>
+                    </div>
+                  </div>
+                </div>
+              )))}        
+          </div>
+        </div>
+
+        {searchCounter === 0 && (
+        <div className="flex flex-row gap-4 justify-between w-[1200px] bg-gray-51 ">
+            <div className="flex flex-1 flex-col gap-5 items-start justify-start w-3/4">
+                <div className="bg-white-A700 flex flex-col items-start justify-start p-5 sm:px-5 rounded-[16px] w-3/4" style={{ height: '300px' }}>
+                  <div className="flex flex-col items-center justify-center w-full">
+                    <Img className="h-[100px] md:h-auto rounded-full py-[5px] mr-4" src="images/img_rectangle5623.png"/>
+                  </div>
+                    <div className="flex flex-col gap-[30px] items-center justify-end w-full">
+                        <Text
+                          className="leading-[180.00%] max-w-[610px] md:max-w-full text-gray-700 text-lg"
+                          size="txtManropeRegular20"
+                       >
+                        "Expert lawyers Signed up on our platform offer specialized legal services,
+                        ensuring tailored solutions"
+                        </Text>
+                        <Text
+                        size="txtManropeSemiBold18Gray900"
+                        >
+                          - Name1
+                        </Text>
+                  </div>
+                </div>  
+              </div>
+              <div className="flex flex-1 flex-col gap-5 items-start justify-start w-3/4">
+                <div className="bg-white-A700 flex flex-col items-start justify-start p-5 sm:px-5 rounded-[16px] w-3/4" style={{ height: '300px' }}>
+                  <div className="flex flex-col items-center justify-center w-full">
+                    <Img className="h-[100px] md:h-auto rounded-full py-[5px] mr-4" src="images/img_rectangle5623.png"/>
+                  </div>
+                    <div className="flex flex-col gap-[30px] items-center justify-end w-full">
+                        <Text
+                          className="leading-[180.00%] max-w-[610px] md:max-w-full text-gray-700 text-lg"
+                          size="txtManropeRegular20"
+                       >
+                        "Expert lawyers Signed up on our platform offer specialized legal services,
+                        ensuring tailored solutions"
+                        </Text>
+                        <Text
+                        size="txtManropeSemiBold18Gray900"
+                        >
+                          - Name2
+                        </Text>
+                  </div>
+                </div>  
+              </div>
+              <div className="flex flex-1 flex-col gap-5 items-start justify-start w-3/4">
+                <div className="bg-white-A700 flex flex-col items-start justify-start p-5 sm:px-5 rounded-[16px] w-3/4" style={{ height: '300px' }}>
+                  <div className="flex flex-col items-center justify-center w-full">
+                    <Img className="h-[100px] md:h-auto rounded-full py-[5px] mr-4" src="images/img_rectangle5623.png"/>
+                  </div>
+                    <div className="flex flex-col gap-[30px] items-center justify-end w-full">
+                        <Text
+                          className="leading-[180.00%] max-w-[610px] md:max-w-full text-gray-700 text-lg"
+                          size="txtManropeRegular20"
+                       >
+                        "Expert lawyers Signed up on our platform offer specialized legal services,
+                        ensuring tailored solutions"
+                        </Text>
+                        <Text
+                        size="txtManropeSemiBold18Gray900"
+                        >
+                          - Name3
+                        </Text>
+                  </div>
+                </div>  
+              </div>
+        </div>
+        )}
+        <p className="mb-4"></p>
       </div>
     </>
   );
